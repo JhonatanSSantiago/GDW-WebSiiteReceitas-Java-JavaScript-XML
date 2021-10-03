@@ -1,4 +1,5 @@
 package com.jhsantiago.receitasweb.model;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
@@ -16,20 +17,21 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
+
 /**
  *
  * @author jhons
  */
-public class Receita {
-    
+public class BuscaReceita {
+
     private Document doc;
 
-    public Receita(String caminho) throws ParserConfigurationException, SAXException, IOException {
+    public BuscaReceita(String caminho) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory fabrica = DocumentBuilderFactory.newInstance();
         DocumentBuilder construtor = fabrica.newDocumentBuilder();
         doc = construtor.parse(caminho);
     }
-    
+
     private String serealizar(Node no) throws TransformerConfigurationException, TransformerException {
         TransformerFactory fabrica = TransformerFactory.newInstance();
         Transformer transformador = fabrica.newTransformer();
@@ -39,46 +41,51 @@ public class Receita {
         transformador.transform(fonte, saida);
         return fluxo.toString();
     }
-    
+
     private Document newDocReceitas() throws ParserConfigurationException {
         Document newDoc;
         DocumentBuilderFactory fabrica = DocumentBuilderFactory.newInstance();
         DocumentBuilder construtor = fabrica.newDocumentBuilder();
         newDoc = construtor.newDocument();
-        Element receitas=newDoc.createElement("receitas");
-        newDoc.appendChild(receitas);
+        Element receita = newDoc.createElement("receita");
+        newDoc.appendChild(receita);
         return newDoc;
     }
-    
-    private void CopyForNewDoc(Node noReceita, Document newDoc){
-        NodeList filhos=noReceita.getChildNodes();
+
+    private void CopyForNewDoc(Node noReceita, Document newDoc) {
+        NodeList filhos = noReceita.getChildNodes();
         int tam = filhos.getLength();
-        Element newReceita=newDoc.createElement("receita");
-        for(int i=0; i<tam ; i++) {
-            Node filho=filhos.item(i);
-            if(filho.getNodeType()==Node.ELEMENT_NODE){
+        for (int i = 0; i < tam; i++) {
+            Node filho = filhos.item(i);
+            if (filho.getNodeType() == Node.ELEMENT_NODE) {
                 Element newTag = newDoc.createElement(filho.getNodeName());
                 Text newText = newDoc.createTextNode(filho.getFirstChild().getNodeValue());
                 newTag.appendChild(newText);
-                newReceita.appendChild(newTag);
+                NodeList filhosDoF = filho.getChildNodes();
+                int tamF = filhosDoF.getLength();
+                for (int o = 0; o < tamF; o++) {
+                    Node filhoDoF = filhosDoF.item(o);
+                    if (filhoDoF.getNodeType() == Node.ELEMENT_NODE) {
+                        Element newTagF = newDoc.createElement(filhoDoF.getNodeName());
+                        Text newTextF = newDoc.createTextNode(filhoDoF.getFirstChild().getNodeValue());
+                        newTagF.appendChild(newTextF);
+                        newTag.appendChild(newTagF);
+                    }
+                }
+                newDoc.getDocumentElement().appendChild(newTag);
             }
         }
-        newDoc.getDocumentElement().appendChild(newReceita);
     }
-    
-    public String FiltroNome(String nome) throws TransformerException, ParserConfigurationException {
-        return FiltroGeral("nome", nome);
-    }
-    
-    private String FiltroGeral(String tag, String valor) throws TransformerException, ParserConfigurationException  {
-        Document newDoc=newDocReceitas();
+  
+    private String FiltroNome(String nome) throws TransformerException, ParserConfigurationException {
+        Document newDoc = newDocReceitas();
         Node noReceita = null;
-        NodeList filhos = doc.getElementsByTagName(tag);
+        NodeList filhos = doc.getElementsByTagName("nome");
         int tam = filhos.getLength();
         for (int i = 0; i < tam; i++) {
             Node noFilho = filhos.item(i);
             if (noFilho != null) {
-                if (noFilho.getFirstChild().getNodeValue().equals(valor)) {
+                if (noFilho.getFirstChild().getNodeValue().equals(nome)) {
                     noReceita = noFilho.getParentNode();
                     CopyForNewDoc(noReceita, newDoc);
                 }
@@ -88,8 +95,8 @@ public class Receita {
     }
 
     public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException, TransformerException {
-        Receita r = new Receita("src/main/java/com/jhsantiago/receitasweb/model/Receitas.xml");
-        System.out.println(r.FiltroNome("Torta de Frango"));
+        BuscaReceita r = new BuscaReceita("src/main/java/com/jhsantiago/receitasweb/model/Receitas.xml");
+        System.out.println(r.FiltroNome("Bolo de Milho sem Farinha"));
 
     }
 }
