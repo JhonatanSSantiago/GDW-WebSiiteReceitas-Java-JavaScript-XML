@@ -50,7 +50,7 @@ public class BuscaNomes {
         return newDoc;
     }
   
-    private String FiltroNome() throws TransformerException, ParserConfigurationException {
+    public String FiltroNome() throws TransformerException, ParserConfigurationException {
         Document newDoc = newDocReceitas();
         //Node noReceita = null;
         NodeList receitas = doc.getElementsByTagName("nome");

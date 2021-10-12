@@ -77,7 +77,7 @@ public class BuscaReceita {
         }
     }
   
-    private String FiltroNome(String nome) throws TransformerException, ParserConfigurationException {
+    public String FiltroNome(String nome) throws TransformerException, ParserConfigurationException {
         Document newDoc = newDocReceitas();
         Node noReceita = null;
         NodeList filhos = doc.getElementsByTagName("nome");
